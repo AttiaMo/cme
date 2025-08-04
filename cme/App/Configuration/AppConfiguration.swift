@@ -10,8 +10,8 @@ final class AppConfiguration {
     
     init() {
         let apiConfig = APIConfiguration(
-            baseURL: "https://restcountries.com/v2",
-            timeout: 30
+            baseURL: AppConstants.apiBaseURL,
+            timeout: AppConstants.networkTimeout
         )
         
         self.networkService = NetworkService(configuration: apiConfig)

@@ -3,7 +3,7 @@ import Foundation
 actor CountryRepository: CountryRepositoryProtocol {
     private let networkService: NetworkServiceProtocol
     private let storageService: StorageServiceProtocol
-    private let maxCountries = 5
+    private let maxCountries = AppConstants.maxCountriesLimit
     
     init(networkService: NetworkServiceProtocol, storageService: StorageServiceProtocol) {
         self.networkService = networkService
@@ -12,7 +12,7 @@ actor CountryRepository: CountryRepositoryProtocol {
     
     func fetchAllCountries() async throws -> [Country] {
         do {
-            let dtos: [CountryDTO] = try await networkService.fetch("/all?fields=name,capital,currencies,alpha2Code,flags")
+            let dtos: [CountryDTO] = try await networkService.fetch("/all?fields=\(AppConstants.apiFields)")
             return dtos.compactMap { $0.toDomainModel() }
         } catch let error as NetworkError {
             throw DomainError.networkError(error)
@@ -31,6 +31,8 @@ actor CountryRepository: CountryRepositoryProtocol {
             }
             throw DomainError.networkError(error)
         } catch {
+            // Preserve original error context for debugging
+            print("[CountryRepository] Unexpected error fetching country \(code): \(error)")
             throw DomainError.networkError(.unknown(error))
         }
     }
@@ -44,7 +46,7 @@ actor CountryRepository: CountryRepositoryProtocol {
         }
         
         do {
-            let endpoint = "/name/\(encodedQuery)?fields=name,capital,currencies,alpha2Code,flags"
+            let endpoint = "/name/\(encodedQuery)?fields=\(AppConstants.apiFields)"
             let dtos: [CountryDTO] = try await networkService.fetch(endpoint)
             return dtos.compactMap { $0.toDomainModel() }
         } catch let error as NetworkError {

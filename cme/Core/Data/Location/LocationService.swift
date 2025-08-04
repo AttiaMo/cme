@@ -29,10 +29,7 @@ actor LocationService: NSObject, LocationServiceProtocol {
     private func requestLocationAndGetCountryCode() async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            
-            Task { @MainActor in
-                locationManager.requestWhenInUseAuthorization()
-            }
+            locationManager.requestWhenInUseAuthorization()
         }
     }
     
@@ -63,7 +60,7 @@ actor LocationService: NSObject, LocationServiceProtocol {
 
 extension LocationService: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        Task { @MainActor in
+        Task {
             await handleAuthorizationChange(manager.authorizationStatus)
         }
     }
@@ -71,13 +68,13 @@ extension LocationService: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         
-        Task { @MainActor in
+        Task {
             await handleLocationUpdate(location)
         }
     }
     
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        Task { @MainActor in
+        Task {
             await handleLocationError()
         }
     }

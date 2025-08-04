@@ -41,7 +41,7 @@ struct CountryListView: View {
             }
             .sheet(isPresented: $showingSearch) {
                 CountrySearchView(
-                    repository: viewModel.repository,
+                    viewModel: viewModel.createSearchViewModel(),
                     onCountrySelected: { country in
                         Task {
                             await viewModel.addCountry(country)

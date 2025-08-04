@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct cmeApp: App {
+struct CMEApp: App {
     @MainActor
     private let appConfig = AppConfiguration()
     

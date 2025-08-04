@@ -4,12 +4,12 @@ import Observation
 @MainActor
 @Observable
 final class CountryListViewModel {
-    let repository: CountryRepositoryProtocol
+    private let repository: CountryRepositoryProtocol
     private let locationBootstrap: LocationBootstrapUseCase
     
-    var countries: [Country] = []
-    var isLoading = false
-    var error: DomainError?
+    private(set) var countries: [Country] = []
+    private(set) var isLoading = false
+    private(set) var error: DomainError?
     var showError = false
     
     init(repository: CountryRepositoryProtocol, locationBootstrap: LocationBootstrapUseCase) {
@@ -73,5 +73,9 @@ final class CountryListViewModel {
             self.error = .invalidData
             self.showError = true
         }
+    }
+    
+    func createSearchViewModel() -> CountrySearchViewModel {
+        CountrySearchViewModel(repository: repository)
     }
 }

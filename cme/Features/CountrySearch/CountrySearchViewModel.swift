@@ -7,11 +7,11 @@ final class CountrySearchViewModel {
     private let repository: CountryRepositoryProtocol
     
     var searchText = ""
-    var searchResults: [Country] = []
-    var isSearching = false
-    var error: DomainError?
+    private(set) var searchResults: [Country] = []
+    private(set) var isSearching = false
+    private(set) var error: DomainError?
     var showError = false
-    var savedCountryIds = Set<String>()
+    private(set) var savedCountryIds = Set<String>()
     
     private var searchTask: Task<Void, Never>?
     
@@ -28,20 +28,18 @@ final class CountrySearchViewModel {
         
         let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Require at least 2 characters to search
-        guard trimmedText.count >= 2 else {
+        // Require minimum characters to search
+        guard trimmedText.count >= AppConstants.minSearchLength else {
             searchResults = []
             return
         }
         
-        searchTask = Task { [weak self] in
-            guard let self else { return }
-            
+        searchTask = Task {
             self.isSearching = true
             
-            // Debounce for 500ms to better handle rapid typing
+            // Debounce to better handle rapid typing
             do {
-                try await Task.sleep(nanoseconds: 500_000_000)
+                try await Task.sleep(nanoseconds: AppConstants.searchDebounceTime)
             } catch {
                 return // Task was cancelled
             }

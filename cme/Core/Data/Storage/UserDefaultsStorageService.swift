@@ -49,8 +49,6 @@ actor UserDefaultsStorageService: StorageServiceProtocol {
         do {
             let data = try encoder.encode(countries)
             userDefaults.set(data, forKey: storageKey)
-            // Force synchronization to ensure data is persisted immediately
-            userDefaults.synchronize()
         } catch {
             throw DomainError.storageError(error)
         }

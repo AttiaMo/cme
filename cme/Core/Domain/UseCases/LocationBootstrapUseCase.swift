@@ -8,7 +8,7 @@ actor LocationBootstrapUseCase {
     init(
         locationService: LocationServiceProtocol,
         repository: CountryRepositoryProtocol,
-        defaultCountryCode: String = "DE"
+        defaultCountryCode: String = AppConstants.defaultCountryCode
     ) {
         self.locationService = locationService
         self.repository = repository

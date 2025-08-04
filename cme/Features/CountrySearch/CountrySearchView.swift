@@ -5,8 +5,8 @@ struct CountrySearchView: View {
     @State private var viewModel: CountrySearchViewModel
     let onCountrySelected: (Country) -> Void
     
-    init(repository: CountryRepositoryProtocol, onCountrySelected: @escaping (Country) -> Void) {
-        self._viewModel = State(wrappedValue: CountrySearchViewModel(repository: repository))
+    init(viewModel: CountrySearchViewModel, onCountrySelected: @escaping (Country) -> Void) {
+        self._viewModel = State(wrappedValue: viewModel)
         self.onCountrySelected = onCountrySelected
     }
     
@@ -57,7 +57,7 @@ struct CountrySearchView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("Type at least 2 characters to search")
+            Text("Type at least \(AppConstants.minSearchLength) characters to search")
                 .font(.body)
                 .foregroundStyle(.secondary)
         }
