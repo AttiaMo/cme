@@ -183,8 +183,7 @@ class MockCountryRepository: CountryRepositoryProtocol {
     }
 }
 
-@MainActor
-class MockLocationBootstrapUseCase: Sendable {
+actor MockLocationBootstrapUseCase {
     var bootstrapCountry: Country?
     var bootstrapCalled = false
     

@@ -20,7 +20,12 @@ actor LocationBootstrapUseCase {
             let countryCode = try await locationService.getCurrentCountryCode()
             return try await findCountryByCode(countryCode)
         } catch {
-            // Fallback to default country
+            // Only fall back to default country if it's not a permission issue
+            if case DomainError.locationDenied = error {
+                // User denied permission, don't try fallback
+                return nil
+            }
+            // For other errors (network, etc.), try fallback
             return try await findCountryByCode(defaultCountryCode)
         }
     }

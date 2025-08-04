@@ -21,7 +21,7 @@ final class CountryListViewModel {
         await loadCountries()
     }
     
-    func loadCountries() async {
+    func loadCountries(shouldBootstrap: Bool = true) async {
         isLoading = true
         error = nil
         showError = false
@@ -29,8 +29,8 @@ final class CountryListViewModel {
         do {
             countries = try await repository.getSavedCountries()
             
-            // Bootstrap with location if no countries saved
-            if countries.isEmpty {
+            // Bootstrap with location if no countries saved and bootstrap is allowed
+            if countries.isEmpty && shouldBootstrap {
                 if let bootstrapCountry = try await locationBootstrap.bootstrap() {
                     try await repository.addCountry(bootstrapCountry)
                     countries = [bootstrapCountry]
@@ -50,7 +50,8 @@ final class CountryListViewModel {
     func removeCountry(_ country: Country) async {
         do {
             try await repository.removeCountry(country)
-            await loadCountries()
+            // Don't bootstrap after deletion - user explicitly removed the country
+            await loadCountries(shouldBootstrap: false)
         } catch let domainError as DomainError {
             self.error = domainError
             self.showError = true
@@ -63,7 +64,8 @@ final class CountryListViewModel {
     func addCountry(_ country: Country) async {
         do {
             try await repository.addCountry(country)
-            await loadCountries()
+            // Don't bootstrap after adding - user explicitly added a country
+            await loadCountries(shouldBootstrap: false)
         } catch let domainError as DomainError {
             self.error = domainError
             self.showError = true

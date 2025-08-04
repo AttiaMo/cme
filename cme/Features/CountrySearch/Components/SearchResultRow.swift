@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchResultRow: View {
     let country: Country
+    let isAlreadySaved: Bool
     
     var body: some View {
         HStack(spacing: 12) {
@@ -34,10 +35,17 @@ struct SearchResultRow: View {
             
             Spacer()
             
-            Image(systemName: "plus.circle.fill")
-                .font(.title2)
-                .foregroundStyle(Color.accentColor)
+            if isAlreadySaved {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Color.green)
+            } else {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Color.accentColor)
+            }
         }
         .padding(.vertical, 4)
+        .opacity(isAlreadySaved ? 0.7 : 1.0)
     }
 }

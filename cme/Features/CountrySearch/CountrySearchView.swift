@@ -83,11 +83,17 @@ struct CountrySearchView: View {
     
     private var searchResultsList: some View {
         List(viewModel.searchResults) { country in
-            SearchResultRow(country: country)
-                .onTapGesture {
+            SearchResultRow(
+                country: country,
+                isAlreadySaved: viewModel.savedCountryIds.contains(country.id)
+            )
+            .onTapGesture {
+                if !viewModel.savedCountryIds.contains(country.id) {
                     onCountrySelected(country)
                     dismiss()
                 }
+                // If already saved, do nothing - the visual indicator shows it's saved
+            }
         }
     }
 }

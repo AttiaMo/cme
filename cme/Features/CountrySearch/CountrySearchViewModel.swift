@@ -11,6 +11,7 @@ final class CountrySearchViewModel {
     var isSearching = false
     var error: DomainError?
     var showError = false
+    var savedCountryIds = Set<String>()
     
     private var searchTask: Task<Void, Never>?
     
@@ -43,10 +44,9 @@ final class CountrySearchViewModel {
             do {
                 self.searchResults = try await self.repository.searchCountries(query: self.searchText)
                 
-                // Filter out already saved countries
+                // Get saved countries to mark them in the UI
                 let savedCountries = try await self.repository.getSavedCountries()
-                let savedIds = Set(savedCountries.map { $0.id })
-                self.searchResults = self.searchResults.filter { !savedIds.contains($0.id) }
+                self.savedCountryIds = Set(savedCountries.map { $0.id })
             } catch let domainError as DomainError {
                 self.error = domainError
                 self.showError = true
