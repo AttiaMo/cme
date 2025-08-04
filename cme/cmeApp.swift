@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct cmeApp: App {
+    @MainActor
+    private let appConfig = AppConfiguration()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CountryListView(
+                viewModel: CountryListViewModel(
+                    repository: appConfig.countryRepository,
+                    locationBootstrap: appConfig.locationBootstrapUseCase
+                )
+            )
         }
     }
 }
