@@ -14,12 +14,26 @@ struct cmeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            CountryListView(
-                viewModel: CountryListViewModel(
-                    repository: appConfig.countryRepository,
-                    locationBootstrap: appConfig.locationBootstrapUseCase
-                )
-            )
+            RootView(appConfig: appConfig)
         }
+    }
+}
+
+@MainActor
+struct RootView: View {
+    let appConfig: AppConfiguration
+    @State private var viewModel: CountryListViewModel
+    
+    init(appConfig: AppConfiguration) {
+        self.appConfig = appConfig
+        let vm = CountryListViewModel(
+            repository: appConfig.countryRepository,
+            locationBootstrap: appConfig.locationBootstrapUseCase
+        )
+        self._viewModel = State(initialValue: vm)
+    }
+    
+    var body: some View {
+        CountryListView(viewModel: viewModel)
     }
 }

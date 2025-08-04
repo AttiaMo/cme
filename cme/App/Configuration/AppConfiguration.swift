@@ -15,7 +15,12 @@ final class AppConfiguration {
         )
         
         self.networkService = NetworkService(configuration: apiConfig)
-        self.storageService = InMemoryStorageService()
+        
+        // Use UserDefaults for persistent storage
+        // This can easily be replaced with any other storage implementation
+        // that conforms to StorageServiceProtocol (e.g., CoreData, SwiftData, SQLite)
+        self.storageService = UserDefaultsStorageService()
+        
         self.locationService = LocationService()
         self.countryRepository = CountryRepository(
             networkService: networkService,
