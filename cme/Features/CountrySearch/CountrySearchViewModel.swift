@@ -22,7 +22,14 @@ final class CountrySearchViewModel {
     func search() {
         searchTask?.cancel()
         
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        // Clear any existing errors immediately
+        self.error = nil
+        self.showError = false
+        
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Require at least 2 characters to search
+        guard trimmedText.count >= 2 else {
             searchResults = []
             return
         }
@@ -31,12 +38,10 @@ final class CountrySearchViewModel {
             guard let self else { return }
             
             self.isSearching = true
-            self.error = nil
-            self.showError = false
             
-            // Debounce for 300ms
+            // Debounce for 500ms to better handle rapid typing
             do {
-                try await Task.sleep(nanoseconds: 300_000_000)
+                try await Task.sleep(nanoseconds: 500_000_000)
             } catch {
                 return // Task was cancelled
             }

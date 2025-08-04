@@ -57,7 +57,7 @@ struct CountrySearchView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("Type the country name to find it")
+            Text("Type at least 2 characters to search")
                 .font(.body)
                 .foregroundStyle(.secondary)
         }
