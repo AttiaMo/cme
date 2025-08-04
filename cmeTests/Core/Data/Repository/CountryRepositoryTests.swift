@@ -106,10 +106,10 @@ final class CountryRepositoryTests: XCTestCase {
         let countryDTOs = [
             CountryDTO(
                 name: "Germany",
-                alpha2Code: "DE",
                 capital: "Berlin",
                 currencies: [CurrencyDTO(code: "EUR", name: "Euro", symbol: "€")],
-                flags: CountryDTO.Flags(png: "https://flagcdn.com/w320/de.png")
+                alpha2Code: "DE",
+                flags: FlagsDTO(svg: nil, png: "https://flagcdn.com/w320/de.png")
             )
         ]
         mockNetworkService.mockResponse = countryDTOs

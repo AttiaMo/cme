@@ -12,9 +12,23 @@ actor CountryRepository: CountryRepositoryProtocol {
     
     func fetchAllCountries() async throws -> [Country] {
         do {
-            let dtos: [CountryDTO] = try await networkService.fetch("/all")
+            let dtos: [CountryDTO] = try await networkService.fetch("/all?fields=name,capital,currencies,alpha2Code,flags")
             return dtos.compactMap { $0.toDomainModel() }
         } catch let error as NetworkError {
+            throw DomainError.networkError(error)
+        } catch {
+            throw DomainError.networkError(.unknown(error))
+        }
+    }
+    
+    func fetchCountryByCode(_ code: String) async throws -> Country? {
+        do {
+            let dto: CountryDTO = try await networkService.fetch("/alpha/\(code)")
+            return dto.toDomainModel()
+        } catch let error as NetworkError {
+            if case .serverError(404) = error {
+                return nil
+            }
             throw DomainError.networkError(error)
         } catch {
             throw DomainError.networkError(.unknown(error))
@@ -30,7 +44,7 @@ actor CountryRepository: CountryRepositoryProtocol {
         }
         
         do {
-            let endpoint = "/name/\(encodedQuery)"
+            let endpoint = "/name/\(encodedQuery)?fields=name,capital,currencies,alpha2Code,flags"
             let dtos: [CountryDTO] = try await networkService.fetch(endpoint)
             return dtos.compactMap { $0.toDomainModel() }
         } catch let error as NetworkError {

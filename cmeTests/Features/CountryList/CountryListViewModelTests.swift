@@ -5,22 +5,29 @@ import XCTest
 final class CountryListViewModelTests: XCTestCase {
     var sut: CountryListViewModel!
     var mockRepository: MockCountryRepository!
-    var mockLocationBootstrap: MockLocationBootstrapUseCase!
+    var mockLocationService: MockLocationService!
+    var locationBootstrap: LocationBootstrapUseCase!
     
     override func setUp() async throws {
         try await super.setUp()
         mockRepository = MockCountryRepository()
-        mockLocationBootstrap = MockLocationBootstrapUseCase()
+        mockLocationService = MockLocationService()
+        locationBootstrap = LocationBootstrapUseCase(
+            locationService: mockLocationService,
+            repository: mockRepository,
+            defaultCountryCode: "DE"
+        )
         sut = CountryListViewModel(
             repository: mockRepository,
-            locationBootstrap: mockLocationBootstrap
+            locationBootstrap: locationBootstrap
         )
     }
     
     override func tearDown() async throws {
         sut = nil
         mockRepository = nil
-        mockLocationBootstrap = nil
+        mockLocationService = nil
+        locationBootstrap = nil
         try await super.tearDown()
     }
     
@@ -58,14 +65,17 @@ final class CountryListViewModelTests: XCTestCase {
     func testLoadCountriesWithBootstrap() async throws {
         // Given
         mockRepository.savedCountries = []
-        let bootstrapCountry = Country(
-            id: "DE",
-            name: "Germany",
-            capital: "Berlin",
-            currencies: [Currency(code: "EUR", name: "Euro", symbol: "€")],
-            flagPNGUrl: nil
-        )
-        mockLocationBootstrap.bootstrapCountry = bootstrapCountry
+        // Set up mock repository to return Germany when looking for "DE"
+        mockRepository.allCountries = [
+            Country(
+                id: "DE",
+                name: "Germany",
+                capital: "Berlin",
+                currencies: [Currency(code: "EUR", name: "Euro", symbol: "€")],
+                flagPNGUrl: nil
+            )
+        ]
+        mockLocationService.mockCountryCode = "DE"
         
         // When
         await sut.loadCountries()
@@ -73,7 +83,6 @@ final class CountryListViewModelTests: XCTestCase {
         // Then
         XCTAssertEqual(sut.countries.count, 1)
         XCTAssertEqual(sut.countries.first?.id, "DE")
-        XCTAssertTrue(mockLocationBootstrap.bootstrapCalled)
         XCTAssertEqual(mockRepository.addCountryCallCount, 1)
     }
     
@@ -152,6 +161,13 @@ class MockCountryRepository: CountryRepositoryProtocol {
         return allCountries
     }
     
+    func fetchCountryByCode(_ code: String) async throws -> Country? {
+        if shouldThrowError, let error = errorToThrow {
+            throw error
+        }
+        return allCountries.first { $0.id.caseInsensitiveCompare(code) == .orderedSame }
+    }
+    
     func searchCountries(query: String) async throws -> [Country] {
         if shouldThrowError, let error = errorToThrow {
             throw error
@@ -183,12 +199,18 @@ class MockCountryRepository: CountryRepositoryProtocol {
     }
 }
 
-actor MockLocationBootstrapUseCase {
-    var bootstrapCountry: Country?
-    var bootstrapCalled = false
+class MockLocationService: LocationServiceProtocol {
+    var mockCountryCode: String?
+    var shouldThrowError = false
+    var errorToThrow: Error = DomainError.locationDenied
     
-    func bootstrap() async throws -> Country? {
-        bootstrapCalled = true
-        return bootstrapCountry
+    func getCurrentCountryCode() async throws -> String {
+        if shouldThrowError {
+            throw errorToThrow
+        }
+        if let code = mockCountryCode {
+            return code
+        }
+        throw DomainError.locationUnavailable
     }
 }
